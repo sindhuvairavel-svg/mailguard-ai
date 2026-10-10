@@ -1,0 +1,7 @@
+{
+  "winner": "LinearSVM_calibrated",
+  "spam_threshold": 0.5114494502227892,
+  "uncertain_low": 0.2531448555194251,
+  "spam_min_precision": 0.98,
+  "min_precision_reached": true
+}
