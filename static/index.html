@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MailGuard AI</title>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--text:#1d2433;--muted:#667085;--line:#e3e6ee;--accent:#3b5bdb;--spam:#d92d20;--safe:#12b76a;--unc:#f79009}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+header{padding:16px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+h1{font-size:1.2rem;margin:0}
+main{max-width:860px;margin:0 auto;padding:16px;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+h2{font-size:1rem;margin:0 0 10px}
+label{display:block;font-size:.85rem;color:var(--muted);margin:8px 0 4px}
+input[type=text],textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit}
+textarea{min-height:160px;resize:vertical}
+button{padding:10px 16px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:inherit;cursor:pointer}
+button.secondary{background:#eef0f6;color:var(--text)}
+button:disabled{opacity:.6;cursor:not-allowed}
+button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #9bb1ff;outline-offset:2px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.badge{display:inline-block;padding:6px 14px;border-radius:999px;color:#fff;font-weight:700;letter-spacing:.04em}
+.spam{background:var(--spam)}.safe{background:var(--safe)}.uncertain{background:var(--unc)}
+.bar{height:12px;border-radius:999px;background:#e9ecf5;overflow:hidden;margin:10px 0 4px}
+.bar>div{height:100%;width:0;background:var(--accent);transition:width .4s}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{padding:3px 10px;border-radius:999px;font-size:.85rem;border:1px solid var(--line)}
+.chip.spam{background:#fee4e2;color:#b42318}.chip.ham{background:#d1fadf;color:#05603a}
+.warn{background:#fff6e5;border:1px solid #fedf89;color:#93370d;padding:6px 10px;border-radius:8px;font-size:.9rem;margin-top:6px}
+.err{background:#fee4e2;border:1px solid #fda29b;color:#b42318;padding:10px;border-radius:8px}
+.muted{color:var(--muted);font-size:.9rem}
+.status{font-size:.85rem;padding:4px 10px;border-radius:999px;background:#eef0f6}
+.status.ok{background:#d1fadf;color:#05603a}.status.down{background:#fee4e2;color:#b42318}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}
+.hidden{display:none}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:0}
+dt{color:var(--muted)}dd{margin:0}
+@media(max-width:520px){dl{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>MailGuard AI</h1>
+  <div><span id="status" class="status" role="status" aria-live="polite">Checking server...</span></div>
+</header>
+<main>
+  <div id="warmup" class="warn hidden" role="status">Server is waking up (free hosting can take up to a minute). Please wait...</div>
+
+  <section class="card">
+    <h2>Check an email</h2>
+    <label for="subject">Subject</label>
+    <input type="text" id="subject" maxlength="500" autocomplete="off">
+    <label for="body">Body</label>
+    <textarea id="body" placeholder="Paste the email text here"></textarea>
+    <div class="row">
+      <button id="analyze">Analyze</button>
+      <label style="margin:0;display:flex;gap:6px;align-items:center">
+        <input type="checkbox" id="live"> Live mode (analyze as I type)
+      </label>
+    </div>
+    <p class="muted">Your email is sent to the model for analysis and is not stored.</p>
+  </section>
+
+  <section class="card" id="resultCard" aria-live="polite">
+    <h2>Result</h2>
+    <div id="empty" class="muted">No result yet. Paste an email and press Analyze.</div>
+    <div id="loading" class="muted hidden">Analyzing...</div>
+    <div id="error" class="err hidden" role="alert"></div>
+    <div id="result" class="hidden">
+      <span id="badge" class="badge"></span>
+      <div class="bar" aria-hidden="true"><div id="fill"></div></div>
+      <div class="muted">Spam probability: <b id="prob"></b></div>
+      <h2 style="margin-top:14px">Top contributing terms</h2>
+      <div class="muted" id="termNote"></div>
+      <div class="chips" id="terms"></div>
+      <div id="warnings"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Batch check (CSV)</h2>
+    <p class="muted">Upload a CSV with a <b>text</b> column.</p>
+    <input type="file" id="csv" accept=".csv,text/csv" aria-label="CSV file">
+    <div class="row"><button id="batchBtn" class="secondary">Run batch</button>
+      <button id="dl" class="secondary hidden">Download results CSV</button></div>
+    <div id="batchMsg" class="muted"></div>
+    <div class="wrap"><table id="batchTable" class="hidden"><thead><tr><th>Row</th><th>Label</th><th>Spam probability</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <h2>Model &amp; Data Transparency</h2>
+    <div id="info" class="muted">Loading...</div>
+  </section>
+</main>
+<script>
+(function(){
+  var $ = function(id){return document.getElementById(id)};
+  var lastBatch = [];
+  var liveTimer = null;
+
+  function show(which){
+    ["empty","loading","error","result"].forEach(function(k){
+      $(k).classList.toggle("hidden", k !== which);
+    });
+  }
+  function setError(msg){ $("error").textContent = msg; show("error"); }
+
+  function api(path, opts, timeoutMs){
+    var ctrl = new AbortController();
+    var t = setTimeout(function(){ctrl.abort()}, timeoutMs || 70000);
+    opts = opts || {}; opts.signal = ctrl.signal;
+    return fetch(path, opts).then(function(r){
+      clearTimeout(t);
+      return r.json().catch(function(){return {}}).then(function(j){return {status:r.status, body:j}});
+    });
+  }
+  function friendly(r){
+    if (r.status === 429) return "Too many requests. Please wait a minute and try again.";
+    if (r.status === 413) return "That file is too large.";
+    if (r.body && r.body.error) return r.body.error;
+    return "Something went wrong (status " + r.status + ").";
+  }
+
+  function checkHealth(){
+    var warm = setTimeout(function(){$("warmup").classList.remove("hidden")}, 4000);
+    api("/api/health", {}, 90000).then(function(r){
+      clearTimeout(warm);
+      $("warmup").classList.add("hidden");
+      var ok = r.status === 200 && r.body.model_loaded;
+      $("status").textContent = ok ? "Server online" : "Server problem";
+      $("status").className = "status " + (ok ? "ok" : "down");
+    }).catch(function(){
+      clearTimeout(warm);
+      $("warmup").classList.add("hidden");
+      $("status").textContent = "Server offline";
+      $("status").className = "status down";
+    });
+  }
+
+  function analyze(){
+    var subject = $("subject").value, body = $("body").value;
+    if (!(subject + body).trim()) { setError("Please enter some email text first."); return; }
+    $("analyze").disabled = true; show("loading");
+    api("/api/predict", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({subject: subject, body: body})})
+      .then(function(r){
+        $("analyze").disabled = false;
+        if (r.status !== 200) { setError(friendly(r)); return; }
+        render(r.body);
+      }).catch(function(){
+        $("analyze").disabled = false;
+        setError("Could not reach the server. Please try again.");
+      });
+  }
+
+  function render(d){
+    var map = {spam:["SPAM","spam"], ham:["SAFE","safe"], uncertain:["UNCERTAIN","uncertain"]};
+    var m = map[d.label] || ["UNKNOWN","uncertain"];
+    $("badge").textContent = m[0]; $("badge").className = "badge " + m[1];
+    var pct = Math.round(d.spam_probability * 1000) / 10;
+    $("prob").textContent = pct + "%";
+    $("fill").style.width = pct + "%";
+    $("fill").style.background = d.label === "spam" ? "var(--spam)" : d.label === "ham" ? "var(--safe)" : "var(--unc)";
+    var terms = $("terms"); terms.innerHTML = "";
+    if (d.top_terms && d.top_terms.terms && d.top_terms.terms.length){
+      $("termNote").textContent = d.top_terms.note;
+      d.top_terms.terms.forEach(function(t){
+        var s = document.createElement("span");
+        s.className = "chip " + t.direction;
+        s.textContent = t.term + " (" + (t.contribution > 0 ? "+" : "") + t.contribution + ")";
+        terms.appendChild(s);
+      });
+    } else { $("termNote").textContent = "No explanation available for this input."; }
+    var w = $("warnings"); w.innerHTML = "";
+    var text = {near_decision_boundary:"The score is close to the decision line, so treat this result with care.",
+      short_input:"Very short text gives less reliable results.",
+      low_vocab_coverage:"Many words were unfamiliar to the model.",
+      non_english_suspected:"The text may not be English; this model works best on English.",
+      trained_on_old_corpus:"The model was trained on an older dataset and may miss newer scams.",
+      explanation_unavailable:"The term explanation could not be computed."};
+    (d.warnings || []).forEach(function(k){
+      var p = document.createElement("div"); p.className = "warn";
+      p.textContent = text[k] || k; w.appendChild(p);
+    });
+    show("result");
+  }
+
+  function runBatch(){
+    var f = $("csv").files[0];
+    if (!f) { $("batchMsg").textContent = "Choose a CSV file first."; return; }
+    var fd = new FormData(); fd.append("file", f);
+    $("batchMsg").textContent = "Processing..."; $("batchBtn").disabled = true;
+    api("/api/batch-predict", {method:"POST", body: fd}).then(function(r){
+      $("batchBtn").disabled = false;
+      if (r.status !== 200) { $("batchMsg").textContent = friendly(r); return; }
+      lastBatch = r.body.results;
+      var tb = document.querySelector("#batchTable tbody"); tb.innerHTML = "";
+      lastBatch.forEach(function(x){
+        var tr = document.createElement("tr");
+        [x.row, x.label === null ? "(empty)" : x.label,
+         x.spam_probability === null ? "" : x.spam_probability.toFixed(3)].forEach(function(v){
+          var td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
+        });
+        tb.appendChild(tr);
+      });
+      $("batchTable").classList.remove("hidden"); $("dl").classList.remove("hidden");
+      $("batchMsg").textContent = r.body.count + " rows processed.";
+    }).catch(function(){
+      $("batchBtn").disabled = false;
+      $("batchMsg").textContent = "Could not reach the server.";
+    });
+  }
+
+  function downloadCsv(){
+    var lines = ["row,label,spam_probability"];
+    lastBatch.forEach(function(x){
+      lines.push([x.row, x.label === null ? "" : x.label,
+                  x.spam_probability === null ? "" : x.spam_probability].join(","));
+    });
+    var blob = new Blob([lines.join("\n")], {type:"text/csv"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "mailguard_results.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function loadInfo(){
+    api("/api/model-info").then(function(r){
+      if (r.status !== 200) { $("info").textContent = "Model info unavailable."; return; }
+      var m = r.body, el = $("info"); el.innerHTML = "";
+      var dl = document.createElement("dl");
+      function add(k, v){
+        var dt = document.createElement("dt"); dt.textContent = k;
+        var dd = document.createElement("dd"); dd.textContent = v;
+        dl.appendChild(dt); dl.appendChild(dd);
+      }
+      var x = m.metrics || {};
+      add("Model", m.model_name + " (v" + m.model_version + ")");
+      add("Trained", m.trained_at);
+      add("Dataset", (m.dataset.files || []).join(", ") || "n/a");
+      add("Spam precision", Number(x.precision).toFixed(3));
+      add("Spam recall", Number(x.recall).toFixed(3));
+      add("False positives / negatives", x.fp + " / " + x.fn + " (held-out test set)");
+      el.appendChild(dl);
+      var h = document.createElement("h2"); h.style.marginTop = "12px"; h.textContent = "Limitations";
+      el.appendChild(h);
+      var ul = document.createElement("ul");
+      (m.limitations || []).forEach(function(l){
+        var li = document.createElement("li"); li.textContent = l; ul.appendChild(li);
+      });
+      el.appendChild(ul);
+    }).catch(function(){ $("info").textContent = "Model info unavailable."; });
+  }
+
+  $("analyze").addEventListener("click", analyze);
+  $("batchBtn").addEventListener("click", runBatch);
+  $("dl").addEventListener("click", downloadCsv);
+  function onType(){
+    if (!$("live").checked) return;
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(analyze, 900);
+  }
+  $("subject").addEventListener("input", onType);
+  $("body").addEventListener("input", onType);
+  checkHealth(); loadInfo(); show("empty");
+})();
+</script>
+</body>
+</html>
