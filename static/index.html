@@ -4,292 +4,339 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MailGuard AI</title>
-body {
-    background: linear-gradient(135deg, #fff8e1, #ffe9a8);
-    color: #3b2f0b;
-  }
-  h1, h2, h3 {
-    color: #8a6100;
-  }
-  button {
-    background: linear-gradient(135deg, #f5c542, #d4a017);
-    color: #2b1d00;
-    border: none;
-    border-radius: 10px;
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(212, 160, 23, 0.4);
-  }
-  button:hover {
-    filter: brightness(1.08);
-  }
-  textarea, input[type="text"] {
-    border: 2px solid #e6b422;
-    border-radius: 10px;
-    background: #fffdf5;
-  }
 <style>
-:root{--bg:#f5f6fa;--card:#fff;--text:#1d2433;--muted:#667085;--line:#e3e6ee;--accent:#3b5bdb;--spam:#d92d20;--safe:#12b76a;--unc:#f79009}
+:root{--gold:#d4a017;--gold2:#f5c542;--dark:#3b2f0b;--brown:#8a6100;--spam:#c62828;--safe:#2e7d32;--warn:#ef6c00;}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
-header{padding:16px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-h1{font-size:1.2rem;margin:0}
-main{max-width:860px;margin:0 auto;padding:16px;display:grid;gap:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
-h2{font-size:1rem;margin:0 0 10px}
-label{display:block;font-size:.85rem;color:var(--muted);margin:8px 0 4px}
-input[type=text],textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit}
-textarea{min-height:160px;resize:vertical}
-button{padding:10px 16px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:inherit;cursor:pointer}
-button.secondary{background:#eef0f6;color:var(--text)}
-button:disabled{opacity:.6;cursor:not-allowed}
-button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #9bb1ff;outline-offset:2px}
-.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px}
-.badge{display:inline-block;padding:6px 14px;border-radius:999px;color:#fff;font-weight:700;letter-spacing:.04em}
-.spam{background:var(--spam)}.safe{background:var(--safe)}.uncertain{background:var(--unc)}
-.bar{height:12px;border-radius:999px;background:#e9ecf5;overflow:hidden;margin:10px 0 4px}
-.bar>div{height:100%;width:0;background:var(--accent);transition:width .4s}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.chip{padding:3px 10px;border-radius:999px;font-size:.85rem;border:1px solid var(--line)}
-.chip.spam{background:#fee4e2;color:#b42318}.chip.ham{background:#d1fadf;color:#05603a}
-.warn{background:#fff6e5;border:1px solid #fedf89;color:#93370d;padding:6px 10px;border-radius:8px;font-size:.9rem;margin-top:6px}
-.err{background:#fee4e2;border:1px solid #fda29b;color:#b42318;padding:10px;border-radius:8px}
-.muted{color:var(--muted);font-size:.9rem}
-.status{font-size:.85rem;padding:4px 10px;border-radius:999px;background:#eef0f6}
-.status.ok{background:#d1fadf;color:#05603a}.status.down{background:#fee4e2;color:#b42318}
-.wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:.9rem}
-th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}
-.hidden{display:none}
-dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:0}
-dt{color:var(--muted)}dd{margin:0}
-@media(max-width:520px){dl{grid-template-columns:1fr}}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;color:var(--dark);
+  background:linear-gradient(135deg,#fff8e1,#ffe9a8 60%,#ffd966);min-height:100vh}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes glowR{0%,100%{box-shadow:0 0 12px rgba(198,40,40,.5)}50%{box-shadow:0 0 34px rgba(198,40,40,.95)}}
+@keyframes glowG{0%,100%{box-shadow:0 0 12px rgba(46,125,50,.5)}50%{box-shadow:0 0 34px rgba(46,125,50,.95)}}
+@keyframes glowO{0%,100%{box-shadow:0 0 12px rgba(239,108,0,.5)}50%{box-shadow:0 0 34px rgba(239,108,0,.95)}}
+
+.hero{background:linear-gradient(135deg,#8a6100,#d4a017 55%,#f5c542);color:#fff;
+  padding:34px 16px 28px;text-align:center;box-shadow:0 6px 20px rgba(138,97,0,.45)}
+.hero h1{margin:0;font-size:2.4rem;letter-spacing:1px;text-shadow:0 3px 6px rgba(0,0,0,.3)}
+.hero p{margin:8px 0 0;font-size:1.1rem;opacity:.97}
+.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.fb{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.55);border-radius:24px;
+  padding:6px 16px;font-weight:600;font-size:.92rem}
+#status{display:inline-block;margin-top:14px;padding:4px 14px;border-radius:20px;
+  font-size:.85rem;background:rgba(0,0,0,.2)}
+
+main{max-width:880px;margin:0 auto;padding:16px}
+.card{background:#fffdf5;border:1px solid #f0d27a;border-radius:18px;padding:20px;margin:18px 0;
+  box-shadow:0 8px 22px rgba(212,160,23,.28);animation:fadeUp .6s ease both}
+.card:nth-of-type(2){animation-delay:.08s}.card:nth-of-type(3){animation-delay:.16s}.card:nth-of-type(4){animation-delay:.24s}
+.card h2{margin:0 0 14px;color:var(--brown);font-size:1.25rem;border-bottom:2px solid var(--gold2);padding-bottom:6px}
+h3{color:var(--brown);margin:18px 0 4px}
+label{font-weight:600;display:block;margin:8px 0 4px}
+input[type=text],textarea{width:100%;padding:11px;border:2px solid #e6b422;border-radius:12px;
+  background:#fffdf5;font-size:1rem;font-family:inherit;transition:box-shadow .2s,border-color .2s}
+textarea{min-height:150px;resize:vertical}
+input:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 4px rgba(245,197,66,.45)}
+button{background:linear-gradient(135deg,#f5c542,#d4a017);color:#2b1d00;border:none;
+  border-radius:12px;font-weight:700;padding:11px 22px;cursor:pointer;font-size:1rem;
+  box-shadow:0 4px 12px rgba(212,160,23,.4);transition:transform .15s,box-shadow .15s,filter .15s}
+button:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(212,160,23,.55);filter:brightness(1.06)}
+button:active{transform:translateY(0)}
+button:disabled{opacity:.6;cursor:wait;transform:none}
+button.sample{background:#fff3c4;border:2px dashed #d4a017;box-shadow:none;padding:8px 14px;font-size:.92rem}
+button.sample:hover{background:#ffe9a0}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.small{font-size:.85rem;color:#7a6520}
+
+/* verdict */
+.verdict{display:flex;align-items:center;gap:18px;flex-wrap:wrap;animation:pop .5s ease both}
+.icon{font-size:3.4rem;line-height:1}
+.vb{display:inline-block;padding:12px 34px;border-radius:40px;font-weight:900;font-size:1.7rem;color:#fff;letter-spacing:2px}
+.b-spam{background:linear-gradient(135deg,#e53935,#b71c1c);animation:glowR 2s infinite}
+.b-ham{background:linear-gradient(135deg,#43a047,#1b5e20);animation:glowG 2s infinite}
+.b-unc{background:linear-gradient(135deg,#fb8c00,#e65100);animation:glowO 2s infinite}
+.bar{height:18px;background:#f3e3b0;border-radius:12px;overflow:hidden;margin:16px 0 4px}
+.fill{height:100%;width:0;transition:width 1s cubic-bezier(.2,.8,.2,1);background:linear-gradient(90deg,#2e7d32,#f5c542,#c62828)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{background:#fff3c4;border:1px solid #e6b422;border-radius:20px;padding:4px 12px;font-size:.9rem;animation:pop .4s ease both}
+.warn{background:#fff3e0;border-left:5px solid var(--warn);padding:8px 12px;border-radius:8px;margin:6px 0;font-size:.92rem}
+.err{background:#ffebee;border-left:5px solid var(--spam);padding:10px 12px;border-radius:8px;margin-top:10px}
+.empty{color:#9b8640;font-style:italic}
+
+/* batch */
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.92rem}
+th{background:#f5c542;color:#2b1d00;text-align:left}
+th,td{padding:8px 10px;border-bottom:1px solid #f0d27a}
+tr.rowin{animation:fadeUp .4s ease both}
+.tw{overflow-x:auto}
+.mini{height:14px;min-width:140px;background:#f3e3b0;border-radius:8px;overflow:hidden}
+.mini i{display:block;height:100%;border-radius:8px;transition:width .8s}
+.summary{margin-top:14px}
+.stack{display:flex;height:26px;border-radius:14px;overflow:hidden;background:#f3e3b0}
+.stack div{height:100%;transition:width .8s}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-weight:600}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px}
+
+dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:6px 14px}
+dt{font-weight:700;color:var(--brown);text-transform:capitalize}dd{margin:0;word-break:break-word}
+@media(max-width:600px){.hero h1{font-size:1.8rem}dl{grid-template-columns:1fr}.vb{font-size:1.3rem;padding:10px 24px}.icon{font-size:2.6rem}}
 </style>
 </head>
 <body>
-<header>
-  <h1>MailGuard AI</h1>
-  <div><span id="status" class="status" role="status" aria-live="polite">Checking server...</span></div>
+<header class="hero">
+  <h1>&#128737; MailGuard AI</h1>
+  <p>Spam &amp; phishing email detector</p>
+  <div class="badges">
+    <span class="fb">&#9889; Fast</span>
+    <span class="fb">&#128274; Private</span>
+    <span class="fb">&#128269; Explainable</span>
+  </div>
+  <span id="status">Checking server...</span>
 </header>
+
 <main>
-  <div id="warmup" class="warn hidden" role="status">Server is waking up (free hosting can take up to a minute). Please wait...</div>
-
   <section class="card">
-    <h2>Check an email</h2>
+    <h2>Analyze an email</h2>
+    <div class="row" style="margin-top:0">
+      <span class="small">Try a sample:</span>
+      <button class="sample" id="sSpam" type="button">&#128683; Spam sample</button>
+      <button class="sample" id="sHam" type="button">&#9989; Safe sample</button>
+    </div>
     <label for="subject">Subject</label>
-    <input type="text" id="subject" maxlength="500" autocomplete="off">
+    <input type="text" id="subject" placeholder="Email subject (optional)">
     <label for="body">Body</label>
-    <textarea id="body" placeholder="Paste the email text here"></textarea>
+    <textarea id="body" placeholder="Paste the email body here..."></textarea>
     <div class="row">
-      <button id="analyze">Analyze</button>
-      <label style="margin:0;display:flex;gap:6px;align-items:center">
-        <input type="checkbox" id="live"> Live mode (analyze as I type)
-      </label>
+      <button id="go">Analyze</button>
+      <label style="margin:0;font-weight:400"><input type="checkbox" id="live"> Live mode (analyze as I type)</label>
     </div>
-    <p class="muted">Your email is sent to the model for analysis and is not stored.</p>
-  </section>
-
-  <section class="card" id="resultCard" aria-live="polite">
-    <h2>Result</h2>
-    <div id="empty" class="muted">No result yet. Paste an email and press Analyze.</div>
-    <div id="loading" class="muted hidden">Analyzing...</div>
-    <div id="error" class="err hidden" role="alert"></div>
-    <div id="result" class="hidden">
-      <span id="badge" class="badge"></span>
-      <div class="bar" aria-hidden="true"><div id="fill"></div></div>
-      <div class="muted">Spam probability: <b id="prob"></b></div>
-      <h2 style="margin-top:14px">Top contributing terms</h2>
-      <div class="muted" id="termNote"></div>
-      <div class="chips" id="terms"></div>
-      <div id="warnings"></div>
-    </div>
+    <p class="small">Your email is sent to the model for analysis and is not stored.</p>
+    <div id="err"></div>
   </section>
 
   <section class="card">
-    <h2>Batch check (CSV)</h2>
-    <p class="muted">Upload a CSV with a <b>text</b> column.</p>
-    <input type="file" id="csv" accept=".csv,text/csv" aria-label="CSV file">
-    <div class="row"><button id="batchBtn" class="secondary">Run batch</button>
-      <button id="dl" class="secondary hidden">Download results CSV</button></div>
-    <div id="batchMsg" class="muted"></div>
-    <div class="wrap"><table id="batchTable" class="hidden"><thead><tr><th>Row</th><th>Label</th><th>Spam probability</th></tr></thead><tbody></tbody></table></div>
+    <h2>Result</h2>
+    <div id="result"><p class="empty">No result yet. Paste an email or try a sample.</p></div>
   </section>
 
   <section class="card">
     <h2>Model &amp; Data Transparency</h2>
-    <div id="info" class="muted">Loading...</div>
+    <div id="info"><p class="empty">Loading model info...</p></div>
+    <p class="small">Predictions are probabilities, not proof. The model can make mistakes, especially on newer scams and non-English emails.</p>
+  </section>
+
+  <section class="card">
+    <h2>Batch check (CSV)</h2>
+    <p class="small">Upload a CSV with a column named <b>text</b>.</p>
+    <input type="file" id="csv" accept=".csv">
+    <div class="row"><button id="batchGo">Check CSV</button><button id="dl" style="display:none">Download results</button></div>
+    <div id="batchErr"></div>
+    <div id="batchSum" class="summary"></div>
+    <div id="batchOut" class="tw"></div>
   </section>
 </main>
+
 <script>
-(function(){
-  var $ = function(id){return document.getElementById(id)};
-  var lastBatch = [];
-  var liveTimer = null;
+const $ = id => document.getElementById(id);
+const pct = x => (typeof x === "number" ? (x * 100).toFixed(1) + "%" : "n/a");
 
-  function show(which){
-    ["empty","loading","error","result"].forEach(function(k){
-      $(k).classList.toggle("hidden", k !== which);
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function showErr(target, msg){
+  target.innerHTML = "";
+  if (msg) target.appendChild(el("div", "err", msg));
+}
+async function readError(r){
+  let msg = "";
+  try { const j = await r.json(); msg = j.error || j.message || ""; } catch(e){}
+  if (r.status === 429) return "Too many requests. Please wait a minute and try again.";
+  if (r.status === 413) return "File is too large.";
+  return msg || ("Request failed (" + r.status + ")");
+}
+
+/* ---------- status + model info ---------- */
+async function loadStatus(){
+  const s = $("status");
+  s.textContent = "Server waking up... (first load can take a while)";
+  try{
+    const r = await fetch("/api/health");
+    s.textContent = r.ok ? "\u25CF Server online" : "\u25CF Server problem";
+  }catch(e){ s.textContent = "\u25CF Server offline"; }
+}
+function fmt(v){
+  if (v === null || v === undefined) return "n/a";
+  if (Array.isArray(v)) return v.map(fmt).join("; ");
+  if (typeof v === "object") return Object.entries(v).map(([k,x]) => k + ": " + fmt(x)).join(", ");
+  if (typeof v === "number") return Number.isInteger(v) ? String(v) : v.toFixed(4);
+  return String(v);
+}
+async function loadInfo(){
+  const box = $("info");
+  try{
+    const r = await fetch("/api/model-info");
+    if (!r.ok) throw new Error();
+    const j = await r.json();
+    const dl = el("dl");
+    Object.entries(j).forEach(([k,v]) => {
+      dl.appendChild(el("dt", "", k.replace(/_/g, " ")));
+      dl.appendChild(el("dd", "", fmt(v)));
     });
-  }
-  function setError(msg){ $("error").textContent = msg; show("error"); }
+    box.innerHTML = ""; box.appendChild(dl);
+  }catch(e){ box.innerHTML = ""; box.appendChild(el("p", "empty", "Model info unavailable.")); }
+}
 
-  function api(path, opts, timeoutMs){
-    var ctrl = new AbortController();
-    var t = setTimeout(function(){ctrl.abort()}, timeoutMs || 70000);
-    opts = opts || {}; opts.signal = ctrl.signal;
-    return fetch(path, opts).then(function(r){
-      clearTimeout(t);
-      return r.json().catch(function(){return {}}).then(function(j){return {status:r.status, body:j}});
-    });
-  }
-  function friendly(r){
-    if (r.status === 429) return "Too many requests. Please wait a minute and try again.";
-    if (r.status === 413) return "That file is too large.";
-    if (r.body && r.body.error) return r.body.error;
-    return "Something went wrong (status " + r.status + ").";
-  }
+/* ---------- single analyze ---------- */
+function termList(j){
+  const t = j.top_terms || j.top_contributing_terms || j.terms || j.explanation;
+  if (!Array.isArray(t)) return null;
+  return t.map(x => {
+    if (typeof x === "string") return x;
+    if (Array.isArray(x)) return x[0] + (typeof x[1] === "number" ? " (" + (x[1] > 0 ? "+" : "") + x[1].toFixed(4) + ")" : "");
+    const w = x.weight !== undefined ? x.weight : (x.contribution !== undefined ? x.contribution : x.score);
+    return (x.term || x.word || "?") + (typeof w === "number" ? " (" + (w > 0 ? "+" : "") + w.toFixed(4) + ")" : "");
+  });
+}
+function render(j){
+  const box = $("result"); box.innerHTML = "";
+  const label = String(j.label || "").toLowerCase();
+  const v = el("div", "verdict");
+  const icon = el("span", "icon"), badge = el("span", "vb");
+  if (label === "spam"){ icon.textContent = "\uD83D\uDEAB"; badge.textContent = "SPAM"; badge.classList.add("b-spam"); }
+  else if (label === "ham" || label === "safe"){ icon.textContent = "\u2705"; badge.textContent = "SAFE"; badge.classList.add("b-ham"); }
+  else { icon.textContent = "\u26A0\uFE0F"; badge.textContent = "UNCERTAIN"; badge.classList.add("b-unc"); }
+  v.appendChild(icon); v.appendChild(badge); box.appendChild(v);
 
-  function checkHealth(){
-    var warm = setTimeout(function(){$("warmup").classList.remove("hidden")}, 4000);
-    api("/api/health", {}, 90000).then(function(r){
-      clearTimeout(warm);
-      $("warmup").classList.add("hidden");
-      var ok = r.status === 200 && r.body.model_loaded;
-      $("status").textContent = ok ? "Server online" : "Server problem";
-      $("status").className = "status " + (ok ? "ok" : "down");
-    }).catch(function(){
-      clearTimeout(warm);
-      $("warmup").classList.add("hidden");
-      $("status").textContent = "Server offline";
-      $("status").className = "status down";
-    });
-  }
+  const p = j.spam_probability;
+  const bar = el("div", "bar"), fill = el("div", "fill");
+  bar.appendChild(fill); box.appendChild(bar);
+  setTimeout(() => { fill.style.width = (typeof p === "number" ? Math.max(0, Math.min(100, p * 100)) : 0) + "%"; }, 50);
+  box.appendChild(el("div", "small", "Spam probability: " + pct(p) +
+    (typeof j.confidence === "number" ? "   |   Confidence: " + pct(j.confidence) : "")));
 
-  function analyze(){
-    var subject = $("subject").value, body = $("body").value;
-    if (!(subject + body).trim()) { setError("Please enter some email text first."); return; }
-    $("analyze").disabled = true; show("loading");
-    api("/api/predict", {method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({subject: subject, body: body})})
-      .then(function(r){
-        $("analyze").disabled = false;
-        if (r.status !== 200) { setError(friendly(r)); return; }
-        render(r.body);
-      }).catch(function(){
-        $("analyze").disabled = false;
-        setError("Could not reach the server. Please try again.");
-      });
-  }
+  const terms = termList(j);
+  box.appendChild(el("h3", "", "Top contributing terms"));
+  box.appendChild(el("div", "small", "model-derived, not proof"));
+  if (terms && terms.length){
+    const c = el("div", "chips");
+    terms.forEach((t, i) => { const s = el("span", "chip", t); s.style.animationDelay = (i * 60) + "ms"; c.appendChild(s); });
+    box.appendChild(c);
+  } else box.appendChild(el("p", "empty", "No explanation available."));
 
-  function render(d){
-    var map = {spam:["SPAM","spam"], ham:["SAFE","safe"], uncertain:["UNCERTAIN","uncertain"]};
-    var m = map[d.label] || ["UNKNOWN","uncertain"];
-    $("badge").textContent = m[0]; $("badge").className = "badge " + m[1];
-    var pct = Math.round(d.spam_probability * 1000) / 10;
-    $("prob").textContent = pct + "%";
-    $("fill").style.width = pct + "%";
-    $("fill").style.background = d.label === "spam" ? "var(--spam)" : d.label === "ham" ? "var(--safe)" : "var(--unc)";
-    var terms = $("terms"); terms.innerHTML = "";
-    if (d.top_terms && d.top_terms.terms && d.top_terms.terms.length){
-      $("termNote").textContent = d.top_terms.note;
-      d.top_terms.terms.forEach(function(t){
-        var s = document.createElement("span");
-        s.className = "chip " + t.direction;
-        s.textContent = t.term + " (" + (t.contribution > 0 ? "+" : "") + t.contribution + ")";
-        terms.appendChild(s);
-      });
-    } else { $("termNote").textContent = "No explanation available for this input."; }
-    var w = $("warnings"); w.innerHTML = "";
-    var text = {near_decision_boundary:"The score is close to the decision line, so treat this result with care.",
-      short_input:"Very short text gives less reliable results.",
-      low_vocab_coverage:"Many words were unfamiliar to the model.",
-      non_english_suspected:"The text may not be English; this model works best on English.",
-      trained_on_old_corpus:"The model was trained on an older dataset and may miss newer scams.",
-      explanation_unavailable:"The term explanation could not be computed."};
-    (d.warnings || []).forEach(function(k){
-      var p = document.createElement("div"); p.className = "warn";
-      p.textContent = text[k] || k; w.appendChild(p);
-    });
-    show("result");
+  if (Array.isArray(j.warnings) && j.warnings.length){
+    box.appendChild(el("h3", "", "Reliability warnings"));
+    j.warnings.forEach(w => box.appendChild(el("div", "warn", typeof w === "string" ? w : fmt(w))));
   }
+}
+let busy = false;
+async function analyze(){
+  const text = ($("subject").value.trim() + "\n" + $("body").value.trim()).trim();
+  showErr($("err"), "");
+  if (!text){ showErr($("err"), "Please enter some email text."); return; }
+  if (busy) return;
+  busy = true; $("go").disabled = true; $("go").textContent = "Analyzing...";
+  try{
+    const r = await fetch("/api/predict", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({text})});
+    if (!r.ok){ showErr($("err"), await readError(r)); }
+    else render(await r.json());
+  }catch(e){ showErr($("err"), "Cannot reach the server. It may be waking up, try again in a moment."); }
+  busy = false; $("go").disabled = false; $("go").textContent = "Analyze";
+}
+$("go").addEventListener("click", analyze);
+let timer;
+function onType(){ if ($("live").checked){ clearTimeout(timer); timer = setTimeout(analyze, 1200); } }
+$("subject").addEventListener("input", onType);
+$("body").addEventListener("input", onType);
 
-  function runBatch(){
-    var f = $("csv").files[0];
-    if (!f) { $("batchMsg").textContent = "Choose a CSV file first."; return; }
-    var fd = new FormData(); fd.append("file", f);
-    $("batchMsg").textContent = "Processing..."; $("batchBtn").disabled = true;
-    api("/api/batch-predict", {method:"POST", body: fd}).then(function(r){
-      $("batchBtn").disabled = false;
-      if (r.status !== 200) { $("batchMsg").textContent = friendly(r); return; }
-      lastBatch = r.body.results;
-      var tb = document.querySelector("#batchTable tbody"); tb.innerHTML = "";
-      lastBatch.forEach(function(x){
-        var tr = document.createElement("tr");
-        [x.row, x.label === null ? "(empty)" : x.label,
-         x.spam_probability === null ? "" : x.spam_probability.toFixed(3)].forEach(function(v){
-          var td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
+/* ---------- samples ---------- */
+$("sSpam").addEventListener("click", () => {
+  $("subject").value = "URGENT: Your account will be suspended";
+  $("body").value = "Dear customer, your bank KYC is expired. Update immediately at http://secure-bank-kyc.xyz/verify or your account will be blocked within 24 hours.";
+  analyze();
+});
+$("sHam").addEventListener("click", () => {
+  $("subject").value = "Meeting notes";
+  $("body").value = "Hi Priya, can you send me the notes from yesterday's lecture? Thanks.";
+  analyze();
+});
+
+/* ---------- batch ---------- */
+let batchRows = [];
+function summary(rows){
+  const box = $("batchSum"); box.innerHTML = "";
+  let s = 0, h = 0, u = 0;
+  rows.forEach(x => {
+    const l = String(x.label).toLowerCase();
+    if (l === "spam") s++; else if (l === "ham" || l === "safe") h++; else u++;
+  });
+  const n = rows.length || 1;
+  const stack = el("div", "stack");
+  [[s, "#c62828"], [u, "#ef6c00"], [h, "#2e7d32"]].forEach(([c, col]) => {
+    const d = el("div"); d.style.background = col; d.style.width = "0%";
+    stack.appendChild(d);
+    setTimeout(() => { d.style.width = (c / n * 100) + "%"; }, 50);
+  });
+  box.appendChild(el("h3", "", "Summary"));
+  box.appendChild(stack);
+  const lg = el("div", "legend");
+  [[s, "Spam", "#c62828"], [u, "Uncertain", "#ef6c00"], [h, "Safe", "#2e7d32"]].forEach(([c, name, col]) => {
+    const it = el("span"); const d = el("span", "dot"); d.style.background = col;
+    it.appendChild(d); it.appendChild(document.createTextNode(name + ": " + c));
+    lg.appendChild(it);
+  });
+  box.appendChild(lg);
+}
+$("batchGo").addEventListener("click", async () => {
+  const f = $("csv").files[0];
+  showErr($("batchErr"), ""); $("batchOut").innerHTML = ""; $("batchSum").innerHTML = ""; $("dl").style.display = "none";
+  if (!f){ showErr($("batchErr"), "Choose a CSV file first."); return; }
+  const fd = new FormData(); fd.append("file", f);
+  $("batchGo").disabled = true;
+  try{
+    const r = await fetch("/api/batch-predict", {method:"POST", body: fd});
+    if (!r.ok){ showErr($("batchErr"), await readError(r)); }
+    else{
+      const j = await r.json();
+      const rows = Array.isArray(j) ? j : (j.results || j.predictions || []);
+      batchRows = rows;
+      if (!rows.length){ showErr($("batchErr"), "No results returned."); }
+      else{
+        summary(rows);
+        const t = el("table"), h = el("tr");
+        ["#", "label", "spam_probability", "graph"].forEach(c => h.appendChild(el("th", "", c)));
+        t.appendChild(h);
+        rows.forEach((x, i) => {
+          const tr = el("tr", "rowin"); tr.style.animationDelay = (i * 50) + "ms";
+          tr.appendChild(el("td", "", String(i + 1)));
+          tr.appendChild(el("td", "", String(x.label)));
+          tr.appendChild(el("td", "", pct(x.spam_probability)));
+          const g = el("td"), m = el("div", "mini"), fl = el("i");
+          const pv = typeof x.spam_probability === "number" ? x.spam_probability : 0;
+          fl.style.width = "0%";
+          fl.style.background = pv >= 0.5 ? "#c62828" : (pv >= 0.25 ? "#ef6c00" : "#2e7d32");
+          setTimeout(() => { fl.style.width = Math.round(pv * 100) + "%"; }, 80);
+          m.appendChild(fl); g.appendChild(m); tr.appendChild(g);
+          t.appendChild(tr);
         });
-        tb.appendChild(tr);
-      });
-      $("batchTable").classList.remove("hidden"); $("dl").classList.remove("hidden");
-      $("batchMsg").textContent = r.body.count + " rows processed.";
-    }).catch(function(){
-      $("batchBtn").disabled = false;
-      $("batchMsg").textContent = "Could not reach the server.";
-    });
-  }
-
-  function downloadCsv(){
-    var lines = ["row,label,spam_probability"];
-    lastBatch.forEach(function(x){
-      lines.push([x.row, x.label === null ? "" : x.label,
-                  x.spam_probability === null ? "" : x.spam_probability].join(","));
-    });
-    var blob = new Blob([lines.join("\n")], {type:"text/csv"});
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob); a.download = "mailguard_results.csv";
-    document.body.appendChild(a); a.click(); a.remove();
-  }
-
-  function loadInfo(){
-    api("/api/model-info").then(function(r){
-      if (r.status !== 200) { $("info").textContent = "Model info unavailable."; return; }
-      var m = r.body, el = $("info"); el.innerHTML = "";
-      var dl = document.createElement("dl");
-      function add(k, v){
-        var dt = document.createElement("dt"); dt.textContent = k;
-        var dd = document.createElement("dd"); dd.textContent = v;
-        dl.appendChild(dt); dl.appendChild(dd);
+        $("batchOut").appendChild(t);
+        $("dl").style.display = "inline-block";
       }
-      var x = m.metrics || {};
-      add("Model", m.model_name + " (v" + m.model_version + ")");
-      add("Trained", m.trained_at);
-      add("Dataset", (m.dataset.files || []).join(", ") || "n/a");
-      add("Spam precision", Number(x.precision).toFixed(3));
-      add("Spam recall", Number(x.recall).toFixed(3));
-      add("False positives / negatives", x.fp + " / " + x.fn + " (held-out test set)");
-      el.appendChild(dl);
-      var h = document.createElement("h2"); h.style.marginTop = "12px"; h.textContent = "Limitations";
-      el.appendChild(h);
-      var ul = document.createElement("ul");
-      (m.limitations || []).forEach(function(l){
-        var li = document.createElement("li"); li.textContent = l; ul.appendChild(li);
-      });
-      el.appendChild(ul);
-    }).catch(function(){ $("info").textContent = "Model info unavailable."; });
-  }
+    }
+  }catch(e){ showErr($("batchErr"), "Cannot reach the server."); }
+  $("batchGo").disabled = false;
+});
+$("dl").addEventListener("click", () => {
+  const q = v => '"' + String(v === undefined ? "" : v).replace(/"/g, '""') + '"';
+  const lines = ["row,label,spam_probability"].concat(
+    batchRows.map((x, i) => [i + 1, q(x.label), x.spam_probability].join(",")));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines.join("\n")], {type: "text/csv"}));
+  a.download = "mailguard_results.csv"; a.click();
+});
 
-  $("analyze").addEventListener("click", analyze);
-  $("batchBtn").addEventListener("click", runBatch);
-  $("dl").addEventListener("click", downloadCsv);
-  function onType(){
-    if (!$("live").checked) return;
-    clearTimeout(liveTimer);
-    liveTimer = setTimeout(analyze, 900);
-  }
-  $("subject").addEventListener("input", onType);
-  $("body").addEventListener("input", onType);
-  checkHealth(); loadInfo(); show("empty");
-})();
+loadStatus(); loadInfo();
 </script>
 </body>
 </html>
